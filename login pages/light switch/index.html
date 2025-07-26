@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Switch Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .login-container {
+            position: relative;
+            width: 380px;
+            height: 500px;
+            perspective: 1000px;
+        }
+
+        .light-switch {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            z-index: 10;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.6s ease;
+        }
+
+        .switch {
+            width: 80px;
+            height: 40px;
+            background: #222;
+            border-radius: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            position: relative;
+            border: 2px solid #444;
+        }
+
+        .switch-knob {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background: #555;
+            border-radius: 50%;
+            top: 4px;
+            left: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffd700;
+        }
+
+        .switch-label {
+            position: absolute;
+            top: -25px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .light-switch.active {
+            transform: rotateY(180deg);
+        }
+
+        .light-switch.active .switch-knob {
+            left: 42px;
+            background: #ffd700;
+            box-shadow: 0 0 15px #ffd700;
+        }
+
+        .login-box {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 20, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: scale(0.95);
+            opacity: 0.7;
+            overflow: hidden;
+        }
+
+        .light-switch.active ~ .login-box {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .light-bulb {
+            position: absolute;
+            top: -50px;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #ffd700 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 1s ease;
+            z-index: -1;
+        }
+
+        .light-switch.active ~ .login-box .light-bulb {
+            opacity: 0.5;
+        }
+
+        .login-title {
+            color: #666;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: color 0.5s ease;
+        }
+
+        .light-switch.active ~ .login-box .login-title {
+            color: #ff6b6b;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+
+        .input-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(30, 30, 40, 0.8);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            color: #ddd;
+            font-size: 16px;
+            transition: all 0.4s ease;
+        }
+
+        .light-switch.active ~ .login-box .input-group input {
+            background: rgba(240, 240, 245, 0.9);
+            color: #333;
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+        }
+
+        .input-group i {
+            position: absolute;
+            right: 20px;
+            top: 16px;
+            color: #777;
+            transition: color 0.3s ease;
+        }
+
+        .light-switch.active ~ .login-box .input-group i {
+            color: #ff6b6b;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #ff8e53);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .forgot-password {
+            color: #777;
+            margin-top: 20px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .light-switch.active ~ .login-box .forgot-password {
+            color: #ff6b6b;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .signup-link {
+            color: #777;
+            margin-top: 30px;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .light-switch.active ~ .login-box .signup-link {
+            color: #555;
+        }
+
+        .signup-link a {
+            color: #ff6b6b;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        .decoration {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background: linear-gradient(90deg, #ff6b6b, #ff8e53);
+            opacity: 0.1;
+            transition: opacity 0.5s ease;
+        }
+
+        .light-switch.active ~ .login-box .decoration {
+            opacity: 0.8;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="light-switch">
+            <div class="switch">
+                <div class="switch-knob"><i class="fas fa-lightbulb"></i></div>
+                <div class="switch-label">Light</div>
+            </div>
+        </div>
+        
+        <div class="login-box">
+            <div class="light-bulb"></div>
+            <div class="particles" id="particles"></div>
+            
+            <h1 class="login-title">Welcome Back</h1>
+            
+            <div class="input-group">
+                <input type="text" placeholder="Username" id="username">
+                <i class="fas fa-user"></i>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" placeholder="Password" id="password">
+                <i class="fas fa-lock"></i>
+            </div>
+            
+            <button class="login-btn">Sign In</button>
+            
+            <a href="#" class="forgot-password">Forgot Password?</a>
+            
+            <div class="signup-link">
+                Don't have an account? <a href="#">Sign Up</a>
+            </div>
+            
+            <div class="decoration"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const lightSwitch = document.querySelector('.light-switch');
+            const loginBox = document.querySelector('.login-box');
+            const particlesContainer = document.getElementById('particles');
+            
+            // Toggle light switch
+            lightSwitch.addEventListener('click', function() {
+                this.classList.toggle('active');
+                
+                // Create particles when light turns on
+                if (this.classList.contains('active')) {
+                    createParticles();
+                }
+            });
+            
+            // Create floating particles effect
+            function createParticles() {
+                particlesContainer.innerHTML = '';
+                
+                for (let i = 0; i < 30; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    // Random position and size
+                    const size = Math.random() * 5 + 2;
+                    const posX = Math.random() * 100;
+                    const posY = Math.random() * 100;
+                    
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.left = `${posX}%`;
+                    particle.style.top = `${posY}%`;
+                    
+                    // Random animation
+                    const animationDuration = Math.random() * 6 + 4;
+                    const animationDelay = Math.random() * 2;
+                    
+                    particle.style.animation = `float ${animationDuration}s ease-in-out ${animationDelay}s infinite`;
+                    
+                    particlesContainer.appendChild(particle);
+                    
+                    // Add animation keyframes dynamically
+                    const styleSheet = document.styleSheets[0];
+                    styleSheet.insertRule(`
+                        @keyframes float {
+                            0% {
+                                transform: translateY(0) translateX(0);
+                                opacity: 0;
+                            }
+                            10% {
+                                opacity: 1;
+                            }
+                            90% {
+                                opacity: 0.7;
+                            }
+                            100% {
+                                transform: translateY(-100px) translateX(${Math.random() * 40 - 20}px);
+                                opacity: 0;
+                            }
+                        }
+                    `, styleSheet.cssRules.length);
+                }
+            }
+            
+            // Form submission
+            const loginForm = document.querySelector('.login-box');
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // Simple validation
+                if(username && password) {
+                    alert(`Welcome back, ${username}!`);
+                } else {
+                    alert('Please fill in all fields');
+                }
+            });
+            
+            // Add animation to inputs on focus
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.03)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
