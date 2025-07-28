@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Hole Loader</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+        
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 10;
+        }
+        
+        #loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s ease-out;
+        }
+        
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #title {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.7);
+            z-index: 20;
+            opacity: 0;
+            animation: fadeIn 1s forwards 0.5s;
+        }
+        
+        .timer {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            color: #00ffff;
+            z-index: 20;
+            opacity: 0.8;
+        }
+        
+        .message {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            color: #aaa;
+            z-index: 20;
+            max-width: 500px;
+            line-height: 1.6;
+            opacity: 0;
+            animation: fadeIn 1s forwards 1.5s;
+        }
+        
+        .content {
+            padding: 40px;
+            max-width: 800px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 1.5s ease-out;
+        }
+        
+        .content h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+        }
+        
+        .content p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #e0e0ff;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #00c9ff, #92fe9d);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #0a1929;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 201, 255, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 201, 255, 0.6);
+        }
+        
+        .counter {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            color: #00ffff;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: monospace;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            #title {
+                font-size: 1.8rem;
+                top: 25%;
+            }
+            
+            .timer {
+                top: 35%;
+            }
+            
+            .message {
+                top: 55%;
+                font-size: 1rem;
+                padding: 0 20px;
+            }
+            
+            .content h1 {
+                font-size: 2.2rem;
+            }
+            
+            .content p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <div id="canvas-container"></div>
+        <h1 id="title">Cosmic Journey</h1>
+        <div class="timer">Loading: <span id="timer">10.0</span>s</div>
+        <div class="message">Simulating spacetime curvature... Preparing hyperspace transition...</div>
+        <div class="counter">00:10</div>
+    </div>
+    
+    <div class="container">
+        <div class="content">
+            <h1>Welcome to the Universe</h1>
+            <p>Your journey through the cosmic gateway is complete. You've witnessed the incredible power of a singularity as it warped spacetime and bent light around its event horizon.</p>
+            <p>This simulation demonstrates how gravitational forces can distort reality itself, creating mesmerizing visual phenomena that challenge our understanding of physics.</p>
+            <p>Continue exploring the mysteries of our universe and the fundamental forces that shape existence.</p>
+            <button class="btn">Begin Exploration</button>
+        </div>
+    </div>
+
+    <script>
+        // Three.js variables
+        let scene, camera, renderer, particles;
+        let particleSystem, particleGeometry, particleMaterial;
+        let clock = new THREE.Clock();
+        let loaderVisible = true;
+        let startTime = Date.now();
+        let loaderDuration = 10; // seconds
+        
+        // Initialize Three.js scene
+        function init() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
+            
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+            
+            // Create particles
+            createParticles();
+            
+            // Add ambient light
+            const ambientLight = new THREE.AmbientLight(0x222244);
+            scene.add(ambientLight);
+            
+            // Add directional light
+            const directionalLight = new THREE.DirectionalLight(0x00ffff, 0.5);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize, false);
+            
+            // Start animation loop
+            animate();
+            
+            // Start countdown timer
+            updateTimer();
+        }
+        
+        // Create particles for the black hole effect
+        function createParticles() {
+            const particleCount = 5000;
+            
+            // Create geometry
+            particleGeometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+            
+            // Create initial positions, colors, and sizes
+            for (let i = 0; i < particleCount; i++) {
+                // Positions in a spherical distribution
+                const radius = 40 + Math.random() * 60;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                const i3 = i * 3;
+                positions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+                positions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                positions[i3 + 2] = radius * Math.cos(phi);
+                
+                // Colors with blue/cyan tint
+                colors[i3] = 0.2 + Math.random() * 0.3; // R
+                colors[i3 + 1] = 0.5 + Math.random() * 0.5; // G
+                colors[i3 + 2] = 0.7 + Math.random() * 0.3; // B
+                
+                // Sizes
+                sizes[i] = 1 + Math.random() * 2;
+            }
+            
+            // Set attributes
+            particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            particleGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            
+            // Create material
+            particleMaterial = new THREE.PointsMaterial({
+                size: 2,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+            
+            // Create particle system
+            particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+            scene.add(particleSystem);
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const elapsedTime = clock.getElapsedTime();
+            const positions = particleGeometry.attributes.position.array;
+            const count = positions.length / 3;
+            
+            // Calculate progress (0 to 1) over 10 seconds
+            const progress = Math.min(elapsedTime / loaderDuration, 1);
+            
+            // Phase 1: Pull particles into the black hole (first 8 seconds)
+            if (progress < 0.8) {
+                const pullProgress = progress / 0.8;
+                
+                for (let i = 0; i < count; i++) {
+                    const i3 = i * 3;
+                    const x = positions[i3];
+                    const y = positions[i3 + 1];
+                    const z = positions[i3 + 2];
+                    
+                    // Calculate distance from center
+                    const distance = Math.sqrt(x*x + y*y + z*z);
+                    
+                    // Normalized direction vector
+                    const dirX = x / distance;
+                    const dirY = y / distance;
+                    const dirZ = z / distance;
+                    
+                    // Calculate spiral effect
+                    const spiralStrength = 0.5;
+                    const spiralX = -dirY * spiralStrength * pullProgress;
+                    const spiralY = dirX * spiralStrength * pullProgress;
+                    
+                    // Calculate pull strength (stronger as particles get closer)
+                    const pullStrength = 0.1 + (1 - pullProgress) * 0.2;
+                    
+                    // Update positions - pull toward center with spiral motion
+                    positions[i3] = x + (dirX * pullStrength + spiralX) * (1 - pullProgress);
+                    positions[i3 + 1] = y + (dirY * pullStrength + spiralY) * (1 - pullProgress);
+                    positions[i3 + 2] = z + dirZ * pullStrength * (1 - pullProgress);
+                }
+            } 
+            // Phase 2: Explosion effect (last 2 seconds)
+            else {
+                const explosionProgress = (progress - 0.8) / 0.2;
+                
+                for (let i = 0; i < count; i++) {
+                    const i3 = i * 3;
+                    
+                    // Explode particles outward with increasing speed
+                    const explosionSpeed = 1.0 + explosionProgress * 5;
+                    positions[i3] *= 1 + explosionSpeed * 0.05;
+                    positions[i3 + 1] *= 1 + explosionSpeed * 0.05;
+                    positions[i3 + 2] *= 1 + explosionSpeed * 0.05;
+                }
+                
+                // Fade out loader at the end of explosion
+                if (explosionProgress > 0.8 && loaderVisible) {
+                    loaderVisible = false;
+                    document.getElementById('loader').style.opacity = '0';
+                    document.querySelector('.content').style.opacity = '1';
+                    document.querySelector('.content').style.transform = 'translateY(0)';
+                    
+                    // Remove loader after transition completes
+                    setTimeout(() => {
+                        document.getElementById('loader').style.display = 'none';
+                    }, 1500);
+                }
+            }
+            
+            // Rotate entire particle system for swirling effect
+            particleSystem.rotation.y = elapsedTime * 0.5;
+            particleSystem.rotation.x = elapsedTime * 0.2;
+            
+            // Update the geometry
+            particleGeometry.attributes.position.needsUpdate = true;
+            
+            // Render the scene
+            renderer.render(scene, camera);
+        }
+        
+        // Update the countdown timer
+        function updateTimer() {
+            const elapsedSeconds = (Date.now() - startTime) / 1000;
+            const remaining = Math.max(loaderDuration - elapsedSeconds, 0).toFixed(1);
+            
+            document.getElementById('timer').textContent = remaining;
+            
+            // Format for counter display
+            const seconds = Math.floor(remaining);
+            const tenths = Math.floor((remaining - seconds) * 10);
+            document.querySelector('.counter').textContent = 
+                `${seconds.toString().padStart(2, '0')}:${tenths.toString().padStart(1, '0')}`;
+            
+            if (remaining > 0) {
+                requestAnimationFrame(updateTimer);
+            }
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Initialize on page load
+        window.onload = init;
+    </script>
+</body>
+</html>
