@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time-Based Theme Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(120deg, #1a2a6c, #b21f1f, #1a2a6c);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            transition: background 1.5s ease;
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            z-index: 10;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1));
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .sun-moon-container {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .sun, .moon {
+            font-size: 40px;
+            color: white;
+        }
+
+        .moon {
+            display: none;
+        }
+
+        .time-indicator {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .login-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+        }
+
+        h2 {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .input-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            outline: none;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .options {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+        }
+
+        .remember input {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        .forgot {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .forgot:hover {
+            color: white;
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff8a00, #e52e71);
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(229, 46, 113, 0.4);
+            margin-bottom: 25px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(229, 46, 113, 0.6);
+        }
+
+        .signup {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 15px;
+        }
+
+        .signup a {
+            color: white;
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 5px;
+        }
+
+        .signup a:hover {
+            text-decoration: underline;
+        }
+
+        .moon-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .moon {
+            position: absolute;
+            top: 50px;
+            left: -100px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #f5f5f5, #d0d0d0);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+            animation: moonOrbit 30s linear infinite;
+            z-index: 1;
+        }
+
+        .moon::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 15px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: rgba(100, 100, 100, 0.3);
+            box-shadow: 
+                25px -10px 0 -3px rgba(100, 100, 100, 0.2),
+                15px 25px 0 -5px rgba(100, 100, 100, 0.25);
+        }
+
+        @keyframes moonOrbit {
+            0% {
+                transform: translateX(0) translateY(0);
+            }
+            25% {
+                transform: translateX(200px) translateY(150px);
+            }
+            50% {
+                transform: translateX(400px) translateY(50px);
+            }
+            75% {
+                transform: translateX(600px) translateY(200px);
+            }
+            100% {
+                transform: translateX(1000px) translateY(100px);
+            }
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        /* Time-based backgrounds */
+        .sunrise-bg {
+            background: linear-gradient(120deg, #ff7e5f, #feb47b, #ffd26f);
+        }
+
+        .day-bg {
+            background: linear-gradient(120deg, #3494e6, #ec6ead, #3494e6);
+        }
+
+        .sunset-bg {
+            background: linear-gradient(120deg, #ff416c, #ff4b2b, #ff416c);
+        }
+
+        .night-bg {
+            background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sun-moon-container">
+            <div class="sun"><i class="fas fa-sun"></i></div>
+            <div class="moon"><i class="fas fa-moon"></i></div>
+        </div>
+        
+        <div class="time-indicator" id="timeIndicator">Current Time: Loading...</div>
+        
+        <div class="login-box">
+            <h2>Welcome Back</h2>
+            <div class="input-group">
+                <input type="text" placeholder="Username" required>
+                <i class="fas fa-user icon"></i>
+            </div>
+            <div class="input-group">
+                <input type="password" placeholder="Password" required>
+                <i class="fas fa-lock icon"></i>
+            </div>
+            <div class="options">
+                <div class="remember">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">Remember me</label>
+                </div>
+                <a href="#" class="forgot">Forgot Password?</a>
+            </div>
+            <button class="login-btn">Login</button>
+            <p class="signup">Don't have an account? <a href="#">Sign Up</a></p>
+        </div>
+    </div>
+    
+    <div class="moon-container" id="moonContainer">
+        <div class="moon" id="moon"></div>
+        <div class="stars" id="stars"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.body;
+            const timeIndicator = document.getElementById('timeIndicator');
+            const sun = document.querySelector('.sun');
+            const moonIcon = document.querySelector('.moon');
+            const moon = document.getElementById('moon');
+            const stars = document.getElementById('stars');
+            
+            // Update time and theme
+            function updateTheme() {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                
+                // Update time display
+                timeIndicator.textContent = `Current Time: ${hours}:${minutes}:${seconds}`;
+                
+                // Determine theme based on time of day
+                if (hours >= 5 && hours < 7) {
+                    body.className = 'sunrise-bg';
+                    timeIndicator.textContent += ' - Sunrise';
+                } else if (hours >= 7 && hours < 17) {
+                    body.className = 'day-bg';
+                    timeIndicator.textContent += ' - Day';
+                } else if (hours >= 17 && hours < 20) {
+                    body.className = 'sunset-bg';
+                    timeIndicator.textContent += ' - Sunset';
+                } else {
+                    body.className = 'night-bg';
+                    timeIndicator.textContent += ' - Night';
+                }
+                
+                // Show/hide sun and moon icons
+                if (hours >= 6 && hours < 18) {
+                    sun.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                } else {
+                    sun.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                }
+                
+                // Show moon and stars only during night
+                if (hours >= 20 || hours < 6) {
+                    moon.style.display = 'block';
+                    createStars();
+                } else {
+                    moon.style.display = 'none';
+                    clearStars();
+                }
+            }
+            
+            // Create stars for night theme
+            function createStars() {
+                // Clear existing stars
+                clearStars();
+                
+                // Create new stars
+                for (let i = 0; i < 100; i++) {
+                    const star = document.createElement('div');
+                    star.classList.add('star');
+                    
+                    // Random position
+                    const top = Math.random() * 100;
+                    const left = Math.random() * 100;
+                    
+                    // Random size (0.5px to 2px)
+                    const size = 0.5 + Math.random() * 1.5;
+                    
+                    // Random opacity
+                    const opacity = 0.3 + Math.random() * 0.7;
+                    
+                    // Random animation delay
+                    const delay = Math.random() * 5;
+                    
+                    star.style.top = `${top}%`;
+                    star.style.left = `${left}%`;
+                    star.style.width = `${size}px`;
+                    star.style.height = `${size}px`;
+                    star.style.opacity = opacity;
+                    star.style.animationDelay = `${delay}s`;
+                    
+                    stars.appendChild(star);
+                }
+            }
+            
+            // Clear stars
+            function clearStars() {
+                while (stars.firstChild) {
+                    stars.removeChild(stars.firstChild);
+                }
+            }
+            
+            // Initial update
+            updateTheme();
+            
+            // Update every second
+            setInterval(updateTheme, 1000);
+            
+            // Create stars initially if needed
+            const hours = new Date().getHours();
+            if (hours >= 20 || hours < 6) {
+                createStars();
+            }
+        });
+    </script>
+</body>
+</html>
